@@ -87,8 +87,8 @@ const registerUserAndSendUserData = async (req, res, next) => {
 
   const updateUserImage = async (req, res, next) => {
     catchError(next, async () => {
-      const { profileURL,_id } = req.body;
-      let user = await User.findById(_id);
+      const { profileURL} = req.body;
+      let user = await User.findById(req.userId);
      
       if (user) {
         user = _.extend(user, { profileURL });
@@ -107,8 +107,8 @@ const registerUserAndSendUserData = async (req, res, next) => {
 
   const updateUserBio = async (req, res, next) => {
     catchError(next, async () => {
-      const { bio,_id} = req.body;
-      let user = await User.findById(_id);
+      const { bio} = req.body;
+      let user = await User.findById(req.userId);
      
       if (user) {
         user = _.extend(user, { bio });

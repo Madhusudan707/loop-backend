@@ -7,12 +7,15 @@ const app = express();
 
 app.use(cors());
 initializeDBConnection();
-app.use(express.json({ extended: false }))
+app.use(express.json({ extended: false }));
 
 const userRouter = require("./routes/user.router");
+const postRouter = require("./routes/post.router");
+const feedRouter = require("./routes/feed.router");
 
-
-app.use("/users",userRouter)
+app.use("/users", userRouter);
+app.use("/post", postRouter);
+app.use("/feed", feedRouter);
 
 app.get("/", (request, response) => {
   response.sendFile(__dirname + "/welcome.html");

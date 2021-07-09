@@ -1,0 +1,27 @@
+const express = require("express");
+const router = express.Router();
+const { authenticateUser } = require("../utility");
+const {
+  registerUserAndSendUserData,
+  loginUserAndSendUserData,
+  getUserData,
+  updateUserImage,
+  updateUserBio,
+  getLoggedInUserData
+} = require("../controllers/users.controller");
+const { update } = require("lodash");
+
+router.route("/register").post(registerUserAndSendUserData);
+
+router.route("/login").post(loginUserAndSendUserData);
+
+router.route("/:username").get(getUserData);
+router.route("/")
+  .get(authenticateUser, getLoggedInUserData);
+
+router.route("/updateImage").post(authenticateUser, updateUserImage);
+router.route("/updateBio").post(authenticateUser, updateUserBio);
+// router.route("/updateImage").post(updateUserImage);
+// router.route("/updateBio").post(updateUserBio);
+
+module.exports = router;

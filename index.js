@@ -12,10 +12,12 @@ app.use(express.json({ extended: false }));
 const userRouter = require("./routes/user.router");
 const postRouter = require("./routes/post.router");
 const feedRouter = require("./routes/feed.router");
+const searchRouter = require("./routes/search.router");
 
 app.use("/users", userRouter);
 app.use("/post", postRouter);
 app.use("/feed", feedRouter);
+app.use("/search", searchRouter);
 
 app.get("/", (request, response) => {
   response.sendFile(__dirname + "/welcome.html");

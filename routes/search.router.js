@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { authenticateUser, catchError } = require("../utility")
-const { Post } = require("../models/users.model")
-const { User } = require("../models/post.model")
+const { Post } = require("../models/post.model")
+const { User } = require("../models/users.model")
 
 router.route("/")
   .get(authenticateUser, async (req, res, next) => {

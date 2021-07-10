@@ -1,10 +1,10 @@
 {
   "name": "loop-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Backend Server of Loop Social App",
   "main": "index.js",
   "engines": {
-    "node": "14.16.0"
+    "node": "14.17.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,15 +13,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mongoose": "^5.12.3",
     "nodemon": "^2.0.7",
-    "bcrypt": "^5.0.1",
-    "jsonwebtoken": "^8.5.1"
+    "socket.io": "^4.1.2"
   }
 }

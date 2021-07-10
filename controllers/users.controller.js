@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models/users.model');
+const { Notification, UserNotification } = require("../models/notification.model")
 const { catchError } = require('../utility');
 const bcrypt = require("bcrypt");
 const secret = process.env.SECRET;
@@ -125,4 +126,105 @@ const registerUserAndSendUserData = async (req, res, next) => {
     });
   }
 
-  module.exports={registerUserAndSendUserData,loginUserAndSendUserData,getLoggedInUserData,getUserData,updateUserImage,updateUserBio }
+  const getUserNetwork = async (req, res, next) => {
+    catchError(next, async () => {
+      const { username } = req.params;
+      let user = await User.find({ username }).populate({
+        path: "followingList",
+        select: "_id name email username bio profileURL"
+      }).populate({
+        path: "followersList",
+        select: "_id name email username bio profileURL"
+      });
+      if (user) {
+        return res.json({
+          success: true,
+          user: _.pick(user[0], ["followingList", "followersList", "name", "_id", "username", "profileURL"])
+        });
+      }
+      return res.json({
+        success: false,
+        message: "User not found!"
+      });
+    });
+  }
+  
+  const addNewFollowing = async (req, res, next) => {
+    catchError(next, async () => {
+      const { userId } = req.body;
+      let followingUser = await User.findById(req.userId);
+      if (followingUser) {
+        followingUser = _.extend(followingUser, { followingList: _.union(followingUser.followingList, [userId]) });
+        await followingUser.save();
+  
+        let followedUser = await User.findById(userId);
+        followedUser = _.extend(followedUser, { followersList: _.union(followedUser.followersList, [req.userId]) });
+        await followedUser.save();
+  
+        const isAlreadyFollowed = await Notification.exists({ action: "FOLLOWED", actionCreatorId: req.userId });
+  
+        if (!isAlreadyFollowed) {
+          let notification = new Notification({ userId: followedUser._id, action: "FOLLOWED", actionCreatorId: req.userId, username: "", isRead: false });
+  
+          notification = await notification.save();
+  
+          let userNotificationList = await UserNotification.findById(followedUser._id);
+  
+          if (userNotificationList) {
+            userNotificationList = _.extend(userNotificationList, { notificationList: _.concat(userNotificationList.notificationList, notification._id) })
+            await userNotificationList.save();
+          } else {
+            userNotificationList = new UserNotification({ _id: followedUser._id, notificationList: [notification._id] })
+            await userNotificationList.save();
+          }
+        }
+  
+        return res.json({
+          success: true,
+          followedUserId: followedUser._id,
+        });
+      }
+      return res.json({
+        success: false,
+        message: "User not found!"
+      });
+    });
+  }
+  
+  const removeFollowing = async (req, res, next) => {
+    catchError(next, async () => {
+      const { userId } = req.body;
+      let unFollowingUser = await User.findById(req.userId);
+      if (unFollowingUser) {
+        unFollowingUser = _.extend(unFollowingUser, { followingList: _.filter(unFollowingUser.followingList, (id) => id.toString() !== userId) });
+        await unFollowingUser.save();
+  
+        let unFollowedUser = await User.findById(userId);
+        unFollowedUser = _.extend(unFollowedUser, { followersList: _.filter(unFollowedUser.followersList, (id) => id.toString() !== req.userId) });
+        await unFollowedUser.save();
+        return res.json({
+          success: true,
+          unFollowedUserId: unFollowedUser._id
+        });
+      }
+      return res.json({
+        success: false,
+        message: "User not found!"
+      });
+    });
+  }
+  
+  const getSearchedUser = async (req, res, next) => {
+    catchError(next, async () => {
+      const { name } = req.body;
+  
+      const userList = await User.find({ name }, "_id name username profileURL");
+      
+      return res.json({
+        success: false,
+        userList
+      });
+    });
+  }
+
+  module.exports={registerUserAndSendUserData,loginUserAndSendUserData,getLoggedInUserData,getUserData,updateUserImage,updateUserBio,addNewFollowing, removeFollowing, getUserNetwork, getSearchedUser }
